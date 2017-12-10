@@ -37,15 +37,19 @@ weekDays =
     [ Sun, Mon, Tue, Wed, Thu, Fri, Sat ]
 
 
-mkDefaultProps : Date -> OnChange msg -> PropsData msg
+mkDefaultProps : Date -> OnChange msg -> Props msg
 mkDefaultProps today onChange =
-    PropsData
-        { today = today
-        , selectedDays = []
-        , monthCount = 1
-        , firstDayOfMonth = DateExtra.toFirstOfMonth today
-        , onChange = onChange
-        }
+    { today = today
+    , selectedDays = []
+    , monthCount = 1
+    , firstDayOfMonth = DateExtra.toFirstOfMonth today
+    , onChange = onChange
+    }
+
+
+mkDefaultPropsData : Date -> OnChange msg -> PropsData msg
+mkDefaultPropsData today onChange =
+    PropsData <| mkDefaultProps today onChange
 
 
 toPrevMonth : Props msg -> Props msg

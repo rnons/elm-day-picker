@@ -7,12 +7,12 @@ import DayPicker
 
 
 type alias Props msg =
-    { dayPickerProps : DayPicker.PropsData msg }
+    { dayPickerProps : DayPicker.Props msg }
 
 
 dayPickerInput : Props msg -> Html msg
 dayPickerInput { dayPickerProps } =
     div []
         [ input [] []
-        , DayPicker.dayPicker dayPickerProps
+        , DayPicker.dayPicker <| DayPicker.PropsData dayPickerProps
         ]

@@ -14,7 +14,7 @@ module.exports = {
     rules: [
       {
         test: /\.elm$/,
-        use: ["elm-webpack-loader"]
+        use: ["elm-webpack-loader?debug"]
       },
       {
         test: /\.css$/,
