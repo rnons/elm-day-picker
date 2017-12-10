@@ -10,16 +10,18 @@ import Date.Extra.Config.Config_ja_jp exposing (config)
 import List.Extra exposing (elemIndex)
 
 
-type alias Props =
-    { today : Date
-    , selectedDays : List Date
-    , monthCount : Int
-    , firstDayOfMonth : Date
-    }
-
-
 type alias OnChange msg =
-    Props -> msg
+    Props msg -> msg
+
+
+type Props msg
+    = Props
+        { today : Date
+        , selectedDays : List Date
+        , monthCount : Int
+        , firstDayOfMonth : Date
+        , onChange : OnChange msg
+        }
 
 
 applyN : Int -> (a -> a) -> a -> a
@@ -32,36 +34,38 @@ weekDays =
     [ Sun, Mon, Tue, Wed, Thu, Fri, Sat ]
 
 
-mkDefaultProps : Date -> Props
-mkDefaultProps today =
-    { today = today
-    , selectedDays = []
-    , monthCount = 1
-    , firstDayOfMonth = DateExtra.toFirstOfMonth today
-    }
+mkDefaultProps : Date -> OnChange msg -> Props msg
+mkDefaultProps today onChange =
+    Props
+        { today = today
+        , selectedDays = []
+        , monthCount = 1
+        , firstDayOfMonth = DateExtra.toFirstOfMonth today
+        , onChange = onChange
+        }
 
 
-toPrevMonth : Props -> Props
-toPrevMonth props =
+toPrevMonth : Props msg -> Props msg
+toPrevMonth (Props props) =
     let
         getter =
             DateExtra.toFirstOfMonth
                 << DateExtra.lastOfPrevMonthDate
     in
-        { props | firstDayOfMonth = getter props.firstDayOfMonth }
+        Props { props | firstDayOfMonth = getter props.firstDayOfMonth }
 
 
-toNextMonth : Props -> Props
-toNextMonth props =
+toNextMonth : Props msg -> Props msg
+toNextMonth (Props props) =
     let
         getter =
             DateExtra.firstOfNextMonthDate
     in
-        { props | firstDayOfMonth = getter props.firstDayOfMonth }
+        Props { props | firstDayOfMonth = getter props.firstDayOfMonth }
 
 
-viewHeader : Props -> Date -> OnChange msg -> Html msg
-viewHeader props firstDay onChange =
+viewHeader : Props msg -> Date -> Html msg
+viewHeader ((Props props) as propsData) firstDay =
     let
         year =
             toString <| Date.year firstDay
@@ -70,9 +74,9 @@ viewHeader props firstDay onChange =
             toString <| DateExtra.monthToInt <| Date.month firstDay
     in
         div [ class "DayPicker-header" ]
-            [ button [ onClick <| onChange <| toPrevMonth props ] [ text "<" ]
+            [ button [ onClick <| props.onChange <| toPrevMonth propsData ] [ text "<" ]
             , text <| year ++ "年" ++ month ++ "月"
-            , button [ onClick <| onChange <| toNextMonth props ] [ text ">" ]
+            , button [ onClick <| props.onChange <| toNextMonth propsData ] [ text ">" ]
             ]
 
 
@@ -141,8 +145,8 @@ viewDayRow firstDayColIndex daysInMonth rowIndex colIndex =
         tr [] row
 
 
-viewDayRows : Props -> Date -> List (Html msg)
-viewDayRows { selectedDays } firstDay =
+viewDayRows : Props msg -> Date -> List (Html msg)
+viewDayRows (Props props) firstDay =
     let
         year =
             Date.year firstDay
@@ -168,13 +172,13 @@ viewDayRows { selectedDays } firstDay =
             (List.range 0 rowCount)
 
 
-viewTableBody : Props -> Date -> Html msg
+viewTableBody : Props msg -> Date -> Html msg
 viewTableBody props firstDay =
     tbody [] <| viewDayRows props firstDay
 
 
-viewMonth : Props -> OnChange msg -> Int -> Html msg
-viewMonth props onChange index =
+viewMonth : Props msg -> Int -> Html msg
+viewMonth ((Props props) as propsData) index =
     let
         firstDay =
             applyN (index - 1)
@@ -182,18 +186,18 @@ viewMonth props onChange index =
                 props.firstDayOfMonth
     in
         div [ class "DayPicker-month" ]
-            [ viewHeader props firstDay onChange
+            [ viewHeader propsData firstDay
             , table [ class "DayPicker-table" ]
                 [ viewTableHeader
-                , viewTableBody props firstDay
+                , viewTableBody propsData firstDay
                 ]
             ]
 
 
-dayPicker : Props -> (Props -> msg) -> Html msg
-dayPicker props onChange =
+dayPicker : Props msg -> Html msg
+dayPicker ((Props props) as propsData) =
     List.range
         1
         props.monthCount
-        |> List.map (viewMonth props onChange)
+        |> List.map (viewMonth propsData)
         |> div [ class "DayPicker" ]
