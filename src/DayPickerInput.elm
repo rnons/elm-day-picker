@@ -6,12 +6,12 @@ import Html.Attributes exposing (..)
 import DayPicker
 
 
-type Props msg
-    = Props { dayPickerProps : DayPicker.Props msg }
+type alias Props msg =
+    { dayPickerProps : DayPicker.PropsData msg }
 
 
 dayPickerInput : Props msg -> Html msg
-dayPickerInput (Props { dayPickerProps }) =
+dayPickerInput { dayPickerProps } =
     div []
         [ input [] []
         , DayPicker.dayPicker dayPickerProps
