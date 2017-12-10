@@ -1,9 +1,10 @@
 module DayPicker exposing (..)
 
+import Date exposing (Date, Month, Day(..))
+import Set exposing (Set)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Date exposing (Date, Month, Day(..))
 import Date.Extra.Core as DateExtra
 import Date.Extra.Create exposing (dateFromFields)
 import Date.Extra.Config.Config_ja_jp exposing (config)
@@ -11,12 +12,12 @@ import List.Extra exposing (elemIndex)
 
 
 type alias OnChange msg =
-    PropsData msg -> msg
+    PropsData msg -> Maybe Date -> msg
 
 
 type alias Props msg =
     { today : Date
-    , selectedDays : List Date
+    , selectedDays : Set Date
     , monthCount : Int
     , firstDayOfMonth : Date
     , onChange : OnChange msg
@@ -40,7 +41,7 @@ weekDays =
 mkDefaultProps : Date -> OnChange msg -> Props msg
 mkDefaultProps today onChange =
     { today = today
-    , selectedDays = []
+    , selectedDays = Set.empty
     , monthCount = 1
     , firstDayOfMonth = DateExtra.toFirstOfMonth today
     , onChange = onChange
@@ -79,20 +80,21 @@ viewHeader props firstDay =
 
         month =
             toString <| DateExtra.monthToInt <| Date.month firstDay
-
-        bindClick =
-            onClick << props.onChange << PropsData
     in
         div [ class "DayPicker-header" ]
             [ button
-                [ bindClick <|
-                    toPrevMonth props
+                [ onClick <|
+                    props.onChange
+                        (PropsData <| toPrevMonth props)
+                        Nothing
                 ]
                 [ text "<" ]
             , text <| year ++ "年" ++ month ++ "月"
             , button
-                [ bindClick <|
-                    toNextMonth props
+                [ onClick <|
+                    props.onChange
+                        (PropsData <| toNextMonth props)
+                        Nothing
                 ]
                 [ text ">" ]
             ]

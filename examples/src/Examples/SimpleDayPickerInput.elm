@@ -8,7 +8,7 @@ import DayPickerInput
 
 
 type Msg
-    = DayChange (DayPicker.PropsData Msg)
+    = DayChange (DayPicker.PropsData Msg) (Maybe Date)
 
 
 type alias Model =
@@ -36,7 +36,7 @@ init today =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DayChange propsData ->
+        DayChange propsData mSelected ->
             let
                 (DayPicker.PropsData dayPickerProps) =
                     propsData
