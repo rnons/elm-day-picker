@@ -1,0 +1,21 @@
+.DayPicker {
+  display: flex;
+}
+
+.DayPicker-month {
+  margin: 0 1rem;
+}
+
+.DayPicker-header {
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.DayPicker-table {
+  text-align: center;
+}
+
+.DayPicker-table td {
+  padding: 0.125rem;
+}
