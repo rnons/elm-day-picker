@@ -1,6 +1,7 @@
 module Examples.SimpleDayPicker exposing (..)
 
 import Date exposing (Date)
+import Set
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import DayPicker
@@ -11,26 +12,38 @@ type Msg
 
 
 type alias Model =
-    { props : DayPicker.PropsData Msg
+    { propsData : DayPicker.PropsData Msg
     }
 
 
 init : Date -> ( Model, Cmd Msg )
 init today =
     let
-        props =
+        propsData =
             DayPicker.mkDefaultPropsData today DayChange
     in
-        ( { props = props }, Cmd.none )
+        ( { propsData = propsData }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DayChange props mSelected ->
-            ( { props = props }, Cmd.none )
+        DayChange propsData mSelected ->
+            case mSelected of
+                Just selected ->
+                    let
+                        (DayPicker.PropsData props) =
+                            propsData
+
+                        newProps =
+                            { props | selectedDays = Set.singleton selected }
+                    in
+                        ( { propsData = DayPicker.PropsData newProps }, Cmd.none )
+
+                Nothing ->
+                    ( { propsData = propsData }, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    DayPicker.dayPicker model.props
+    DayPicker.dayPicker model.propsData

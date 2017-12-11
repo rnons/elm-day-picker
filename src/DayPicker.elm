@@ -72,6 +72,11 @@ toNextMonth props =
         { props | firstDayOfMonth = getter props.firstDayOfMonth }
 
 
+selectDay : Props msg -> Date -> Int -> msg
+selectDay props firstDayOfMonth dayOfMonth =
+    props.onChange (PropsData props) (Just firstDayOfMonth)
+
+
 viewHeader : Props msg -> Date -> Html msg
 viewHeader props firstDay =
     let
@@ -110,22 +115,19 @@ viewTableHeader =
             [ tr [] (List.map viewDay weekDays) ]
 
 
-viewDay : Maybe Int -> Html msg
-viewDay mDayOfMonth =
-    let
-        content =
-            case mDayOfMonth of
-                Just mDayOfMonth ->
-                    text <| toString mDayOfMonth
+viewDay : Props msg -> Date -> Maybe Int -> Html msg
+viewDay props firstDay mDayOfMonth =
+    case mDayOfMonth of
+        Just dayOfMonth ->
+            td [ onClick <| selectDay props firstDay dayOfMonth ]
+                [ text <| toString dayOfMonth ]
 
-                Nothing ->
-                    text ""
-    in
-        td [] [ content ]
+        Nothing ->
+            td [] [ text "" ]
 
 
-viewDayRow : Int -> Int -> Int -> Int -> Html msg
-viewDayRow firstDayColIndex daysInMonth rowIndex colIndex =
+viewDayRow : Props msg -> Date -> Int -> Int -> Int -> Int -> Html msg
+viewDayRow props firstDay firstDayColIndex daysInMonth rowIndex colIndex =
     let
         colIndex =
             if rowIndex == 0 then
@@ -158,9 +160,9 @@ viewDayRow firstDayColIndex daysInMonth rowIndex colIndex =
                 7 - colIndex - dayCount
 
         row =
-            List.repeat colIndex (viewDay Nothing)
-                ++ List.map (viewDay << Just) days
-                ++ List.repeat paddingRight (viewDay Nothing)
+            List.repeat colIndex (viewDay props firstDay Nothing)
+                ++ List.map (viewDay props firstDay << Just) days
+                ++ List.repeat paddingRight (viewDay props firstDay Nothing)
     in
         tr [] row
 
@@ -188,7 +190,7 @@ viewDayRows props firstDay =
                 Just index ->
                     ( index, (index + daysInMonth) // 7 )
     in
-        List.indexedMap (viewDayRow firstDayColIndex daysInMonth)
+        List.indexedMap (viewDayRow props firstDay firstDayColIndex daysInMonth)
             (List.range 0 rowCount)
 
 
